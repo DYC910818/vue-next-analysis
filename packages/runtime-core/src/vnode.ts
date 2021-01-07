@@ -10,7 +10,7 @@ import {
   PatchFlags,
   ShapeFlags,
   SlotFlags,
-  isOn
+  isOn,
 } from '@vue/shared'
 import {
   ComponentInternalInstance,
@@ -18,7 +18,7 @@ import {
   ConcreteComponent,
   ClassComponent,
   Component,
-  isClassComponent
+  isClassComponent,
 } from './component'
 import { RawSlots } from './componentSlots'
 import { isProxy, Ref, toRaw, ReactiveFlags, isRef } from '@vue/reactivity'
@@ -27,7 +27,7 @@ import {
   SuspenseImpl,
   isSuspense,
   SuspenseBoundary,
-  normalizeSuspenseChildren
+  normalizeSuspenseChildren,
 } from './components/Suspense'
 import { DirectiveBinding } from './directives'
 import { TransitionHooks } from './components/BaseTransition'
@@ -73,7 +73,7 @@ export type VNodeNormalizedRefAtom = {
 
 export type VNodeNormalizedRef =
   | VNodeNormalizedRefAtom
-  | (VNodeNormalizedRefAtom)[]
+  | VNodeNormalizedRefAtom[]
 
 type VNodeMountHook = (vnode: VNode) => void
 type VNodeUpdateHook = (vnode: VNode, oldVNode: VNode) => void
@@ -267,6 +267,7 @@ export function isSameVNodeType(n1: VNode, n2: VNode): boolean {
     // HMR only: if the component has been hot-updated, force a reload.
     return false
   }
+  // n1 和 n2 节点的 type 和 key 都相同，才是相同节点
   return n1.type === n2.type && n1.key === n2.key
 }
 
@@ -309,7 +310,7 @@ const normalizeRef = ({ ref }: VNodeProps): VNodeNormalizedRefAtom | null => {
       : ref
     : null) as any
 }
-
+// createVNode ：对 props 做标准化处理、对 vnode 的类型信息编码、创建 vnode 对象，标准化子节点 children 。
 export const createVNode = (__DEV__
   ? createVNodeWithArgsTransform
   : _createVNode) as typeof _createVNode
@@ -369,14 +370,14 @@ function _createVNode(
   const shapeFlag = isString(type)
     ? ShapeFlags.ELEMENT
     : __FEATURE_SUSPENSE__ && isSuspense(type)
-      ? ShapeFlags.SUSPENSE
-      : isTeleport(type)
-        ? ShapeFlags.TELEPORT
-        : isObject(type)
-          ? ShapeFlags.STATEFUL_COMPONENT
-          : isFunction(type)
-            ? ShapeFlags.FUNCTIONAL_COMPONENT
-            : 0
+    ? ShapeFlags.SUSPENSE
+    : isTeleport(type)
+    ? ShapeFlags.TELEPORT
+    : isObject(type)
+    ? ShapeFlags.STATEFUL_COMPONENT
+    : isFunction(type)
+    ? ShapeFlags.FUNCTIONAL_COMPONENT
+    : 0
 
   if (__DEV__ && shapeFlag & ShapeFlags.STATEFUL_COMPONENT && isProxy(type)) {
     type = toRaw(type)
@@ -414,7 +415,7 @@ function _createVNode(
     patchFlag,
     dynamicProps,
     dynamicChildren: null,
-    appContext: null
+    appContext: null,
   }
 
   // validate key
@@ -454,7 +455,7 @@ function _createVNode(
 
 export function cloneVNode<T, U>(
   vnode: VNode<T, U>,
-  extraProps?: Data & VNodeProps | null,
+  extraProps?: (Data & VNodeProps) | null,
   mergeRef = false
 ): VNode<T, U> {
   // This is intentionally NOT using spread or extend to avoid the runtime
@@ -509,7 +510,7 @@ export function cloneVNode<T, U>(
     ssContent: vnode.ssContent && cloneVNode(vnode.ssContent),
     ssFallback: vnode.ssFallback && cloneVNode(vnode.ssFallback),
     el: vnode.el,
-    anchor: vnode.anchor
+    anchor: vnode.anchor,
   }
 }
 

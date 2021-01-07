@@ -7,7 +7,7 @@ import {
   Renderer,
   HydrationRenderer,
   App,
-  RootHydrateFunction
+  RootHydrateFunction,
 } from '@vue/runtime-core'
 import { nodeOps } from './nodeOps'
 import { patchProp, forcePatchProp } from './patchProp'
@@ -21,6 +21,7 @@ declare module '@vue/reactivity' {
   }
 }
 
+// 渲染相关的一些配置，比如更新属性的方法，操作 DOM 的方法
 const rendererOptions = extend({ patchProp, forcePatchProp }, nodeOps)
 
 // lazy create the renderer - this makes core renderer logic tree-shakable
@@ -29,6 +30,7 @@ let renderer: Renderer<Element> | HydrationRenderer
 
 let enabledHydration = false
 
+// 延时创建渲染器，当用户只依赖响应式包的时候，可以通过 tree-shaking 移除核心渲染逻辑相关的代码
 function ensureRenderer() {
   return renderer || (renderer = createRenderer<Node, Element>(rendererOptions))
 }
@@ -51,6 +53,7 @@ export const hydrate = ((...args) => {
 }) as RootHydrateFunction
 
 export const createApp = ((...args) => {
+  // 创建 app
   const app = ensureRenderer().createApp(...args)
 
   if (__DEV__) {
@@ -58,15 +61,20 @@ export const createApp = ((...args) => {
   }
 
   const { mount } = app
+  // 重写 mount 方法
   app.mount = (containerOrSelector: Element | ShadowRoot | string): any => {
+    // 标准化容器
+    // 这里可以传字符串选择器或者 DOM 对象，但如果是字符串选择器，就需要把它转成 DOM 对象，作为最终挂载的容器
     const container = normalizeContainer(containerOrSelector)
     if (!container) return
     const component = app._component
+    // 如组件对象没有定义 render 函数和 template 模板，则取容器的 innerHTML 作为组件模板内容
     if (!isFunction(component) && !component.render && !component.template) {
       component.template = container.innerHTML
     }
     // clear content before mounting
     container.innerHTML = ''
+    // 真正的挂载
     const proxy = mount(container)
     if (container instanceof Element) {
       container.removeAttribute('v-cloak')
@@ -101,7 +109,7 @@ function injectNativeTagCheck(app: App) {
   // this is used for component name validation (dev only)
   Object.defineProperty(app.config, 'isNativeTag', {
     value: (tag: string) => isHTMLTag(tag) || isSVGTag(tag),
-    writable: false
+    writable: false,
   })
 }
 
@@ -137,7 +145,7 @@ export { useCssVars } from './helpers/useCssVars'
 export { Transition, TransitionProps } from './components/Transition'
 export {
   TransitionGroup,
-  TransitionGroupProps
+  TransitionGroupProps,
 } from './components/TransitionGroup'
 
 // **Internal** DOM-only runtime directive helpers
@@ -146,7 +154,7 @@ export {
   vModelCheckbox,
   vModelRadio,
   vModelSelect,
-  vModelDynamic
+  vModelDynamic,
 } from './directives/vModel'
 export { withModifiers, withKeys } from './directives/vOn'
 export { vShow } from './directives/vShow'

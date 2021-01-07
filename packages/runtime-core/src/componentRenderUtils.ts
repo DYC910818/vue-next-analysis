@@ -1,7 +1,7 @@
 import {
   ComponentInternalInstance,
   FunctionalComponent,
-  Data
+  Data,
 } from './component'
 import {
   VNode,
@@ -10,7 +10,7 @@ import {
   Comment,
   cloneVNode,
   VNodeArrayChildren,
-  isVNode
+  isVNode,
 } from './vnode'
 import { handleError, ErrorCodes } from './errorHandling'
 import { PatchFlags, ShapeFlags, isOn, isModelListener } from '@vue/shared'
@@ -59,7 +59,7 @@ export function renderComponentRoot(
     renderCache,
     data,
     setupState,
-    ctx
+    ctx,
   } = instance
 
   let result
@@ -103,7 +103,7 @@ export function renderComponentRoot(
                       return attrs
                     },
                     slots,
-                    emit
+                    emit,
                   }
                 : { attrs, slots, emit }
             )
@@ -297,6 +297,7 @@ const isElementRoot = (vnode: VNode) => {
   )
 }
 
+// 主要是通过检测和对比组件 vnode 中的 props、chidren、dirs、transiton 等属性，来决定子组件是否需要更新。
 export function shouldUpdateComponent(
   prevVNode: VNode,
   nextVNode: VNode,
@@ -309,6 +310,7 @@ export function shouldUpdateComponent(
   // Parent component's render function was hot-updated. Since this may have
   // caused the child component's slots content to have changed, we need to
   // force the child to update as well.
+  // 父组件的渲染函数被热更新。因为这可能会导致子组件的slot内容发生变化，所以我们需要强制子组件进行更新。
   if (__DEV__ && (prevChildren || nextChildren) && isHmrUpdating) {
     return true
   }

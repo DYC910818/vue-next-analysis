@@ -2,7 +2,7 @@ import {
   ConcreteComponent,
   Data,
   validateComponentName,
-  Component
+  Component,
 } from './component'
 import { ComponentOptions } from './componentOptions'
 import { ComponentPublicInstance } from './componentPublicInstance'
@@ -89,7 +89,7 @@ export interface AppContext {
 type PluginInstallFunction = (app: App, ...options: any[]) => any
 
 export type Plugin =
-  | PluginInstallFunction & { install?: PluginInstallFunction }
+  | (PluginInstallFunction & { install?: PluginInstallFunction })
   | {
       install: PluginInstallFunction
     }
@@ -104,12 +104,12 @@ export function createAppContext(): AppContext {
       optionMergeStrategies: {},
       isCustomElement: NO,
       errorHandler: undefined,
-      warnHandler: undefined
+      warnHandler: undefined,
     },
     mixins: [],
     components: {},
     directives: {},
-    provides: Object.create(null)
+    provides: Object.create(null),
   }
 }
 
@@ -124,6 +124,7 @@ export function createAppAPI<HostElement>(
   render: RootRenderFunction,
   hydrate?: RootHydrateFunction
 ): CreateAppFunction<HostElement> {
+  // createApp createApp 方法接受的两个参数：根组件的对象和 prop
   return function createApp(rootComponent, rootProps = null) {
     if (rootProps != null && !isObject(rootProps)) {
       __DEV__ && warn(`root props passed to app.mount() must be an object.`)
@@ -226,6 +227,7 @@ export function createAppAPI<HostElement>(
 
       mount(rootContainer: HostElement, isHydrate?: boolean): any {
         if (!isMounted) {
+          // 创建根组件的 vnode
           const vnode = createVNode(
             rootComponent as ConcreteComponent,
             rootProps
@@ -244,6 +246,7 @@ export function createAppAPI<HostElement>(
           if (isHydrate && hydrate) {
             hydrate(vnode as VNode<Node, Element>, rootContainer as any)
           } else {
+            // 利用渲染器渲染 vnodey
             render(vnode, rootContainer)
           }
           isMounted = true
@@ -289,7 +292,7 @@ export function createAppAPI<HostElement>(
         context.provides[key as string] = value
 
         return app
-      }
+      },
     })
 
     return app
